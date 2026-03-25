@@ -1,6 +1,7 @@
 package fr.white.appcourse
 
 import fr.white.appcourse.controllers.registerListeRoutes
+import fr.white.appcourse.services.ListeService
 import io.ktor.server.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -13,12 +14,14 @@ fun main() {
         .start(wait = true)
 }
 
-fun Application.module() {
+fun Application.module(
+    listeService: ListeService = ListeService.fromEnvironment()
+) {
 
     routing {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
-        registerListeRoutes()
+        registerListeRoutes(listeService)
     }
 }

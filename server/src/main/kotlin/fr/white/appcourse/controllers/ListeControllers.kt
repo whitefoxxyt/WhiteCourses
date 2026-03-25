@@ -1,6 +1,8 @@
 package fr.white.appcourse.controllers
 
 import fr.white.appcourse.ApiConstants
+import fr.white.appcourse.services.ListeQueryResult
+import fr.white.appcourse.services.ListeService
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
@@ -9,8 +11,12 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.patch
 import io.ktor.server.routing.route
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
-fun Route.registerListeRoutes() {
+private val jsonEncoder = Json { prettyPrint = false }
+
+fun Route.registerListeRoutes(listeService: ListeService) {
     route(ApiConstants.ENDPOINT_LISTES) {
         get("/{listId}") {
             val listId = call.parameters["listId"]?.toIntOrNull()
@@ -20,16 +26,30 @@ fun Route.registerListeRoutes() {
                 return@get call.respond(HttpStatusCode.BadRequest, "listId invalide")
             }
 
-            // Stub de contrat API: la persistance MySQL arrive dans les US suivantes.
-            val payload = """
-                [
-                  {"id":1,"nom":"Pommes","quantite":4,"categorieNom":"Fruits","PositionEnRayon":1,"estAchete":false},
-                  {"id":2,"nom":"Lait","quantite":1,"categorieNom":"Frais","PositionEnRayon":2,"estAchete":false},
-                  {"id":3,"nom":"Eau","quantite":6,"categorieNom":"Boissons","PositionEnRayon":3,"estAchete":false}
-                ]
-            """.trimIndent()
+            val magasinIdRaw = call.request.queryParameters[ApiConstants.PARAM_MAGASIN_ID]
+            val magasinId = when {
+                magasinIdRaw.isNullOrBlank() -> null
+                else -> magasinIdRaw.toIntOrNull()
+                    ?: return@get call.respond(HttpStatusCode.BadRequest, "magasinId invalide")
+            }
 
-            call.respondText(payload, ContentType.Application.Json)
+            if (magasinId != null && magasinId <= 0) {
+                return@get call.respond(HttpStatusCode.BadRequest, "magasinId invalide")
+            }
+
+            try {
+                when (val result = listeService.getListeTriee(listId, magasinId)) {
+                    is ListeQueryResult.Found -> {
+                        val payload = jsonEncoder.encodeToString(result.items)
+                        call.respondText(payload, ContentType.Application.Json, HttpStatusCode.OK)
+                    }
+                    ListeQueryResult.ListeNotFound -> {
+                        call.respond(HttpStatusCode.NotFound, "liste introuvable")
+                    }
+                }
+            } catch (_: Exception) {
+                call.respond(HttpStatusCode.InternalServerError, "erreur interne")
+            }
         }
 
         patch("/item/{itemId}/etat") {

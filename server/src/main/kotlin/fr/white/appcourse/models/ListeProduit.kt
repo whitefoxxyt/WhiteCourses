@@ -5,5 +5,6 @@ data class ListeProduit(
     val nom: String,
     val quantite: Int,
     val categorieNom: String,
+    val positionEnRayon: Int?,
     val estAchete: Boolean
 )
