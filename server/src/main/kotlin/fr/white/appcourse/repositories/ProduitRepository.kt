@@ -7,6 +7,12 @@ import java.sql.DriverManager
 interface ProduitRepository {
     fun listeExists(listId: Int): Boolean
     fun findProduitsByListe(listId: Int, magasinId: Int?): List<ListeProduit>
+    fun setItemAchete(itemId: Int, estAchete: Boolean): UpdateItemEtatResult
+}
+
+sealed interface UpdateItemEtatResult {
+    data object Updated : UpdateItemEtatResult
+    data object NotFound : UpdateItemEtatResult
 }
 
 data class DatabaseConfig(
@@ -81,6 +87,31 @@ class JdbcProduitRepository(
                         )
                     }
                     return items
+                }
+            }
+        }
+    }
+
+    override fun setItemAchete(itemId: Int, estAchete: Boolean): UpdateItemEtatResult {
+        connection().use { conn ->
+            conn.prepareStatement("UPDATE Listes_Produits SET est_achete = ? WHERE id = ?").use { stmt ->
+                stmt.setBoolean(1, estAchete)
+                stmt.setInt(2, itemId)
+                val updatedRows = stmt.executeUpdate()
+                if (updatedRows > 0) {
+                    return UpdateItemEtatResult.Updated
+                }
+            }
+
+            conn.prepareStatement("SELECT 1 FROM Listes_Produits WHERE id = ? LIMIT 1").use { stmt ->
+                stmt.setInt(1, itemId)
+                stmt.executeQuery().use { rs ->
+                    return if (rs.next()) {
+                        // MySQL can return 0 updated rows when value is unchanged.
+                        UpdateItemEtatResult.Updated
+                    } else {
+                        UpdateItemEtatResult.NotFound
+                    }
                 }
             }
         }

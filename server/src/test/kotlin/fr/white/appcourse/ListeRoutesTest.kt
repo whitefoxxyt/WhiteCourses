@@ -2,6 +2,7 @@ package fr.white.appcourse
 
 import fr.white.appcourse.models.ListeProduit
 import fr.white.appcourse.repositories.ProduitRepository
+import fr.white.appcourse.repositories.UpdateItemEtatResult
 import fr.white.appcourse.services.ListeService
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
@@ -63,5 +64,8 @@ private class FakeProduitRepository(
     override fun listeExists(listId: Int): Boolean = exists
 
     override fun findProduitsByListe(listId: Int, magasinId: Int?): List<ListeProduit> = items
-}
 
+    override fun setItemAchete(itemId: Int, estAchete: Boolean): UpdateItemEtatResult {
+        return UpdateItemEtatResult.NotFound
+    }
+}

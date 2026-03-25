@@ -97,6 +97,7 @@ Base path: `/api`
   - Validation error `400`: plain error message
 - `PATCH /api/listes/item/{itemId}/etat?achete={true|false}`
   - Success `200`: `{ "itemId": Int, "estAchete": Boolean }`
+  - Not found `404`: `item introuvable`
   - Validation error `400`: plain error message
 
 The contract paths and parameters are centralized in:
