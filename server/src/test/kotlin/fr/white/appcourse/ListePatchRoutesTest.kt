@@ -68,10 +68,48 @@ class ListePatchRoutesTest {
         val response = client.patch("/api/listes/item/0/etat?achete=true")
         assertEquals(HttpStatusCode.BadRequest, response.status)
     }
+
+    @Test
+    fun `patch toggle returns 400 for non numeric itemId`() = testApplication {
+        application {
+            module(ListeService(FakePatchProduitRepository(existingItems = setOf(10))))
+        }
+
+        val response = client.patch("/api/listes/item/abc/etat?achete=true")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `patch toggle returns 400 when achete query is missing`() = testApplication {
+        application {
+            module(ListeService(FakePatchProduitRepository(existingItems = setOf(10))))
+        }
+
+        val response = client.patch("/api/listes/item/10/etat")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `patch toggle returns 500 when service throws`() = testApplication {
+        application {
+            module(
+                ListeService(
+                    FakePatchProduitRepository(
+                        existingItems = setOf(10),
+                        throwOnSet = true
+                    )
+                )
+            )
+        }
+
+        val response = client.patch("/api/listes/item/10/etat?achete=true")
+        assertEquals(HttpStatusCode.InternalServerError, response.status)
+    }
 }
 
 private class FakePatchProduitRepository(
-    existingItems: Set<Int>
+    existingItems: Set<Int>,
+    private val throwOnSet: Boolean = false
 ) : ProduitRepository {
     private val existingItems = existingItems.toMutableSet()
 
@@ -80,6 +118,7 @@ private class FakePatchProduitRepository(
     override fun findProduitsByListe(listId: Int, magasinId: Int?): List<ListeProduit> = emptyList()
 
     override fun setItemAchete(itemId: Int, estAchete: Boolean): UpdateItemEtatResult {
+        if (throwOnSet) error("db offline")
         return if (existingItems.contains(itemId)) {
             UpdateItemEtatResult.Updated
         } else {
@@ -87,4 +126,3 @@ private class FakePatchProduitRepository(
         }
     }
 }
-

@@ -46,6 +46,26 @@ class ListeRoutesTest {
     }
 
     @Test
+    fun `get liste triee returns 400 when listId is invalid`() = testApplication {
+        application {
+            module(ListeService(FakeProduitRepository(exists = true, items = emptyList())))
+        }
+
+        val response = client.get("/api/listes/abc")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
+    fun `get liste triee returns 400 when magasinId is not positive`() = testApplication {
+        application {
+            module(ListeService(FakeProduitRepository(exists = true, items = emptyList())))
+        }
+
+        val response = client.get("/api/listes/1?magasinId=0")
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+    }
+
+    @Test
     fun `get liste triee returns 404 when list does not exist`() = testApplication {
         application {
             module(ListeService(FakeProduitRepository(exists = false, items = emptyList())))
@@ -55,15 +75,37 @@ class ListeRoutesTest {
         assertEquals(HttpStatusCode.NotFound, response.status)
         assertEquals("liste introuvable", response.bodyAsText())
     }
+
+    @Test
+    fun `get liste triee returns 500 when service throws`() = testApplication {
+        application {
+            module(
+                ListeService(
+                    FakeProduitRepository(
+                        exists = true,
+                        items = emptyList(),
+                        throwOnFind = true
+                    )
+                )
+            )
+        }
+
+        val response = client.get("/api/listes/1?magasinId=2")
+        assertEquals(HttpStatusCode.InternalServerError, response.status)
+    }
 }
 
 private class FakeProduitRepository(
     private val exists: Boolean,
-    private val items: List<ListeProduit>
+    private val items: List<ListeProduit>,
+    private val throwOnFind: Boolean = false
 ) : ProduitRepository {
     override fun listeExists(listId: Int): Boolean = exists
 
-    override fun findProduitsByListe(listId: Int, magasinId: Int?): List<ListeProduit> = items
+    override fun findProduitsByListe(listId: Int, magasinId: Int?): List<ListeProduit> {
+        if (throwOnFind) error("db offline")
+        return items
+    }
 
     override fun setItemAchete(itemId: Int, estAchete: Boolean): UpdateItemEtatResult {
         return UpdateItemEtatResult.NotFound
