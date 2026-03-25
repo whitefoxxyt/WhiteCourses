@@ -57,6 +57,9 @@ in your IDE’s toolbar or run it directly from the terminal:
   .\gradlew.bat :server:run
   ```
 
+Database setup for the server (`MaListe` schema):
+- [`server/README-db.md`](./server/README-db.md)
+
 ### Build and Run Web Application
 
 To build and run the development version of the web app, use the run configuration from the run widget
