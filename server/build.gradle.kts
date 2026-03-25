@@ -18,6 +18,7 @@ dependencies {
     implementation(libs.logback)
     implementation(libs.ktor.serverCore)
     implementation(libs.ktor.serverNetty)
+    implementation("io.ktor:ktor-server-status-pages-jvm:3.3.3")
     implementation("io.ktor:ktor-server-content-negotiation-jvm:3.3.3")
     implementation("io.ktor:ktor-serialization-kotlinx-json-jvm:3.3.3")
     implementation("com.mysql:mysql-connector-j:8.4.0")

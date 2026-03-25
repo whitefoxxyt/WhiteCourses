@@ -43,18 +43,14 @@ fun Route.registerListeRoutes(listeService: ListeService) {
                 return@get call.respond(HttpStatusCode.BadRequest, "magasinId invalide")
             }
 
-            try {
-                when (val result = listeService.getListeTriee(listId, magasinId)) {
-                    is ListeQueryResult.Found -> {
-                        val payload = buildItemsJson(result.items)
-                        call.respondText(payload, ContentType.Application.Json, HttpStatusCode.OK)
-                    }
-                    ListeQueryResult.ListeNotFound -> {
-                        call.respond(HttpStatusCode.NotFound, "liste introuvable")
-                    }
+            when (val result = listeService.getListeTriee(listId, magasinId)) {
+                is ListeQueryResult.Found -> {
+                    val payload = buildItemsJson(result.items)
+                    call.respondText(payload, ContentType.Application.Json, HttpStatusCode.OK)
                 }
-            } catch (_: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "erreur interne")
+                ListeQueryResult.ListeNotFound -> {
+                    call.respond(HttpStatusCode.NotFound, "liste introuvable")
+                }
             }
         }
 
@@ -67,18 +63,14 @@ fun Route.registerListeRoutes(listeService: ListeService) {
             val achete = call.request.queryParameters[ApiConstants.PARAM_ACHETE]?.toBooleanStrictOrNull()
                 ?: return@patch call.respond(HttpStatusCode.BadRequest, "parametre achete invalide")
 
-            try {
-                when (val result = listeService.setItemAchete(itemId, achete)) {
-                    is ToggleAchatResult.Updated -> {
-                        val payload = "{\"itemId\":${result.itemId},\"estAchete\":${result.estAchete}}"
-                        call.respondText(payload, ContentType.Application.Json, HttpStatusCode.OK)
-                    }
-                    ToggleAchatResult.ItemNotFound -> {
-                        call.respond(HttpStatusCode.NotFound, "item introuvable")
-                    }
+            when (val result = listeService.setItemAchete(itemId, achete)) {
+                is ToggleAchatResult.Updated -> {
+                    val payload = "{\"itemId\":${result.itemId},\"estAchete\":${result.estAchete}}"
+                    call.respondText(payload, ContentType.Application.Json, HttpStatusCode.OK)
                 }
-            } catch (_: Exception) {
-                call.respond(HttpStatusCode.InternalServerError, "erreur interne")
+                ToggleAchatResult.ItemNotFound -> {
+                    call.respond(HttpStatusCode.NotFound, "item introuvable")
+                }
             }
         }
     }

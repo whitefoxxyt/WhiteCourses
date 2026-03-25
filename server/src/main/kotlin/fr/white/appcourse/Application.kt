@@ -15,8 +15,10 @@ fun main() {
 }
 
 fun Application.module(
-    listeService: ListeService = ListeService.fromEnvironment()
+    listeService: ListeService = ListeService.fromEnvironment(),
+    accessLogger: (String) -> Unit = {}
 ) {
+    configureObservability(accessLogger)
 
     routing {
         get("/") {
