@@ -28,6 +28,10 @@ kotlin {
     }
 
     sourceSets {
+        androidMain.dependencies {
+            implementation("io.ktor:ktor-client-okhttp:3.3.3")
+        }
+
         commonMain.dependencies {
             implementation("io.ktor:ktor-client-core:3.3.3")
             implementation("io.ktor:ktor-client-content-negotiation:3.3.3")
