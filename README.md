@@ -85,6 +85,21 @@ in your IDE's toolbar or run it directly from the terminal:
 To build and run the development version of the iOS app, use the run configuration from the run widget
 in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
 
+### API MVP contract (`shared` <-> `server`)
+
+Base path: `/api`
+
+- `GET /api/listes/{listId}?magasinId={magasinId}`
+  - Success `200`: `List<ProduitItem>`
+  - Validation error `400`: plain error message
+- `PATCH /api/listes/item/{itemId}/etat?achete={true|false}`
+  - Success `200`: `{ "itemId": Int, "estAchete": Boolean }`
+  - Validation error `400`: plain error message
+
+The contract paths and parameters are centralized in:
+- `shared/src/commonMain/kotlin/fr/white/appcourse/Constants.kt`
+- `shared/src/commonMain/kotlin/fr/white/appcourse/network/ShoppingApiContract.kt`
+
 ---
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
