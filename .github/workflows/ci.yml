@@ -45,8 +45,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build project
-        run: ./gradlew build -x test --no-daemon
+      - name: Build project (exclude iOS targets)
+        run: ./gradlew build -x test -x :composeApp:compileTestKotlinIosArm64 -x :composeApp:compileTestKotlinIosSimulatorArm64 -x :shared:compileTestKotlinIosArm64 -x :shared:compileTestKotlinIosSimulatorArm64 --no-daemon
 
       - name: Run tests
         run: ./gradlew :server:test --no-daemon
