@@ -1,13 +1,31 @@
-# Configuration GitHub Actions pour SonarQube
+# Workflows GitHub Actions - AppCourse
 
 ## 🎯 Vue d'ensemble
 
-Ce workflow GitHub Actions automatise :
-- ✅ Build du projet
-- ✅ Exécution des tests
-- ✅ Génération du rapport de couverture (JaCoCo)
-- ✅ Analyse SonarQube
-- ✅ Vérification Quality Gate
+Ce repository contient 3 workflows séparés et optimisés :
+
+### 1. 🧪 **test.yml** - Tests
+- Exécute les tests du module `server`
+- Génère le rapport de couverture JaCoCo
+- Upload les artifacts de test
+- ⚡ Rapide (~2-3 min)
+
+### 2. 📊 **sonar.yml** - Analyse SonarCloud
+- Build du module server
+- Génère la couverture de code
+- Analyse SonarCloud complète
+- ⚡ Moyen (~3-5 min)
+
+### 3. 🏗️ **build.yml** - Build
+- Build du module server uniquement
+- Upload des artifacts JAR
+- ⚡ Très rapide (~1-2 min)
+
+**Avantages de cette séparation :**
+- ✅ Workflows plus rapides et ciblés
+- ✅ Meilleure visibilité des erreurs
+- ✅ Possibilité d'exécuter indépendamment
+- ✅ Cache Gradle partagé entre workflows
 
 ---
 

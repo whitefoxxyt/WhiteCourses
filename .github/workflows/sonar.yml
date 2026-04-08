@@ -1,4 +1,4 @@
-name: CI - Tests & SonarCloud Analysis
+name: SonarCloud Analysis
 
 on:
   push:
@@ -9,8 +9,8 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  test-and-analyze:
-    name: Build, Test & Analyze
+  sonarcloud:
+    name: SonarCloud Scan
     runs-on: ubuntu-latest
     
     services:
@@ -33,7 +33,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for better analysis
+          fetch-depth: 0  # Shallow clones should be disabled for better SonarCloud analysis
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -45,11 +45,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Build project (exclude iOS targets)
-        run: ./gradlew build -x test -x :composeApp:compileTestKotlinIosArm64 -x :composeApp:compileTestKotlinIosSimulatorArm64 -x :shared:compileTestKotlinIosArm64 -x :shared:compileTestKotlinIosSimulatorArm64 --no-daemon
-
-      - name: Run tests
-        run: ./gradlew :server:test --no-daemon
+      - name: Build server module
+        run: ./gradlew :server:build --no-daemon
         env:
           DB_HOST: localhost
           DB_PORT: 3306
@@ -57,11 +54,8 @@ jobs:
           DB_USER: appuser
           DB_PASSWORD: apppassword
 
-      - name: Generate JaCoCo coverage report
+      - name: Generate coverage report
         run: ./gradlew :server:jacocoTestReport --no-daemon
-
-      - name: Verify coverage threshold
-        run: ./gradlew :server:jacocoTestCoverageVerification --no-daemon
         continue-on-error: true
 
       - name: SonarCloud Scan
@@ -69,21 +63,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: |
-            server/build/reports/tests/test/
-            server/build/reports/jacoco/
-
-      - name: Upload coverage to Codecov (optional)
-        if: success()
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./server/build/reports/jacoco/test/jacocoTestReport.xml
-          flags: unittests
-          name: codecov-umbrella
-        continue-on-error: true
