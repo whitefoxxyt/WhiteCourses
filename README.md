@@ -1,5 +1,69 @@
 This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop (JVM), Server.
 
+## ⚠️ Note importante : Docker Compose
+
+Si vous voyez l'erreur `docker-compose: commande introuvable`, consultez [FIX_DOCKER_COMPOSE.md](./FIX_DOCKER_COMPOSE.md).
+
+**TL;DR:** Utilisez `docker compose` (sans tiret) au lieu de `docker-compose`.
+
+## 🐳 Docker, Tests & SonarQube
+
+⚠️ **Note importante** : Le build WASM dans Docker peut être long (10-15 min). Consultez [QUICK_START_OPTIONS.md](./QUICK_START_OPTIONS.md) pour les options de démarrage rapide.
+
+Pour une documentation complète sur Docker, les tests et SonarQube, consultez [DOCKER_TESTS_SONAR.md](./DOCKER_TESTS_SONAR.md).
+
+### 🚀 Option 1 : Démarrage rapide (Recommandé)
+
+```bash
+# Build WebApp localement (3-5 min)
+./build-webapp-local.sh
+
+# Démarrer tous les services
+docker compose -f docker-compose.simple.yml up -d
+```
+
+### 🐢 Option 2 : Build complet dans Docker (10-15 min)
+
+```bash
+# Configuration
+cp .env.example .env
+
+# Démarrer tous les services (build autonome)
+docker compose up -d
+
+# Vérifier le statut
+docker compose ps
+```
+
+### ⚡ Option 3 : Backend uniquement (le plus rapide)
+
+```bash
+# Démarrer MySQL, Server et SonarQube uniquement
+docker compose up -d mysql server sonarqube sonarqube-db
+```
+
+**Services disponibles :**
+- Frontend Web : http://localhost:3000
+- Backend API : http://localhost:8080
+- SonarQube : http://localhost:9000
+
+### Tests et Couverture
+
+```bash
+# Tests backend + couverture
+./gradlew :server:test :server:jacocoTestReport
+
+# Tests frontend
+./gradlew :composeApp:allTests
+
+# Analyse SonarQube complète
+./analyze.sh [SONAR_TOKEN]
+```
+
+---
+
+## 📁 Project Structure
+
 * [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
   It contains several subfolders:
   - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
@@ -116,3 +180,9 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
 If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## 🔧 Troubleshooting Rapide
+
+- **`docker-compose: commande introuvable`** → [FIX_DOCKER_COMPOSE.md](./FIX_DOCKER_COMPOSE.md)
+- **Port déjà utilisé (3306, 8080, etc.)** → [FIX_PORT_CONFLICT.md](./FIX_PORT_CONFLICT.md)
+- **Build WASM trop lent** → [QUICK_START_OPTIONS.md](./QUICK_START_OPTIONS.md)
+- **Guide complet** → [DOCKER_TESTS_SONAR.md](./DOCKER_TESTS_SONAR.md)

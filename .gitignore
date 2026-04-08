@@ -24,3 +24,12 @@ node_modules/
 /native/
 /wrapper/
 /android/
+
+# Environment & Docker
+.env
+*.log
+secrets/
+mysql_data/
+sonarqube_data/
+sonarqube_logs/
+sonarqube_extensions/
